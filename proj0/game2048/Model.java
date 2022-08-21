@@ -119,16 +119,19 @@ public class Model extends Observable {
         for (int col = 0; col < size; col++) {
             for (int row = size - 1; row >= 0; row--){
                 Tile tile = board.tile(col, row);
-                int nextRow = nextNonNullTileRow(col, row);
-                if (nextRow == -1) break;
-                Tile nextTile = board.tile(col, nextRow);
+                int nr = row - 1;
+                for ( ; nr >=0; nr-- ) {
+                    if (board.tile(col, nr) != null) break;
+                }
+                // [2,0,2,2] -> [4,2,0,0]
+                if(nr < 0) break;
+                Tile nextTile = board.tile(col, nr);
                 if (tile == null || tile.value() == nextTile.value()) {
-                    changed = true;
                     if (board.move(col, row, nextTile)) {
                         score += 2 * nextTile.value();
-                    } else {
-                        row++;
                     }
+                    else row++;
+                    changed = true;
                 }
             }
         }
@@ -141,14 +144,6 @@ public class Model extends Observable {
         return changed;
     }
 
-    private int nextNonNullTileRow(int col, int row) {
-        for (int pos = row - 1; pos >= 0; pos--) {
-            if (board.tile(col, pos) != null) {
-                return pos;
-            }
-        }
-        return -1;
-    }
     /** Checks if the game is over and sets the gameOver variable
      *  appropriately.
      */
